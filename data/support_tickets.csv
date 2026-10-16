@@ -1,0 +1,91 @@
+received_at,subject,body,category
+2026-01-05,Invoice charged twice,"Hi, I was charged twice for invoice 4471 this month. Please refund the duplicate payment.",billing
+2026-01-06,Compressor stops with error,Our AX-200 compressor stops after ten minutes and shows error E104.,technical
+2026-01-07,Opening hours,What are your office opening hours during the holidays?,general
+2026-01-10,Wrong VAT on invoice,The VAT on our last invoice is 19% but we are VAT exempt. Please send a corrected invoice.,billing
+2026-01-11,High discharge temperature,The controller shows a high discharge temperature alarm every afternoon.,technical
+2026-01-12,Product catalogue,Where can I download the latest product catalogue?,general
+2026-01-15,Refund request,We returned the filter kit three weeks ago and still have not received the refund.,billing
+2026-01-16,Machine not starting,After the maintenance visit the machine does not start at all.,technical
+2026-01-17,Distributor in Pune,Do you have an authorised distributor in Pune?,general
+2026-01-20,Payment not reflected,We paid by bank transfer on Monday but your portal still shows the invoice as unpaid.,billing
+2026-01-21,Pressure drop,System pressure drops below the set point when two tools run together.,technical
+2026-01-22,Factory visit,We would like to visit your factory with our engineering team.,general
+2026-01-25,Credit note missing,Please issue the credit note for the cancelled service visit.,billing
+2026-01-26,Oil leak,There is an oil leak under the compressor near the drain valve.,technical
+2026-01-27,Account manager,Who is our account manager for the western region?,general
+2026-01-30,Update billing address,Our finance department moved. Please update the billing address on all future invoices.,billing
+2026-01-31,Strange noise,The motor makes a loud rattling noise during start-up.,technical
+2026-02-01,Training courses,Do you offer training courses for maintenance staff?,general
+2026-02-04,Price higher than quote,The invoice amount is higher than the quotation we approved. Can you explain the difference?,billing
+2026-02-05,Controller display blank,The controller display is blank but the unit seems to have power.,technical
+2026-02-06,Partnership enquiry,We are interested in becoming a sales partner in our region.,general
+2026-02-09,Duplicate invoice,We received the same invoice number twice with different amounts.,billing
+2026-02-10,Firmware update failed,The firmware update on the controller failed halfway and now it reboots.,technical
+2026-02-11,Career opportunities,Are there any open positions in your service department?,general
+2026-02-14,Payment terms,Can we change our payment terms from 30 days to 60 days?,billing
+2026-02-15,Dryer alarm,The refrigerant dryer shows a dew point alarm.,technical
+2026-02-16,Sustainability report,Where can I find your latest sustainability report?,general
+2026-02-19,Late payment fee,Why was a late payment fee added? We paid before the due date.,billing
+2026-02-20,Installation question,What clearance is needed around the compressor during installation?,technical
+2026-02-21,Trade fair,Will you exhibit at the industrial trade fair next month?,general
+2026-02-24,Invoice copy,Please resend a PDF copy of invoice 9932 for our auditors.,billing
+2026-02-25,Sensor fault,We get a pressure sensor fault code on the display.,technical
+2026-02-26,Contact for press,Who should journalists contact for press enquiries?,general
+2026-03-01,Service contract billing,Our service contract was billed monthly but the agreement says quarterly billing.,billing
+2026-03-02,Unit trips,The unit trips the main breaker at start-up.,technical
+2026-03-03,Brochure request,Please send us a brochure about your vacuum solutions.,general
+2026-03-06,Card declined,"My credit card payment for the spare parts order was declined, how else can I pay?",billing
+2026-03-07,Overheating,The compressor overheats in summer even though the room is ventilated.,technical
+2026-03-08,Office address,What is the address of your regional office?,general
+2026-03-11,Currency on invoice,The invoice is in USD but our contract is in EUR.,billing
+2026-03-12,Remote monitoring offline,The remote monitoring gateway shows the machine offline since yesterday.,technical
+2026-03-13,Newsletter,How can I subscribe to your product newsletter?,general
+2026-03-16,Overcharged for parts,"We were overcharged for the oil separator, the price list says less.",billing
+2026-03-17,Water in air line,There is water in the compressed air line after the dryer.,technical
+2026-03-18,Product comparison,What is the difference between your fixed speed and variable speed ranges?,general
+2026-03-21,Refund status,What is the status of the refund for order 55120?,billing
+2026-03-22,Vibration,Excessive vibration on the vacuum pump after replacing the coupling.,technical
+2026-03-23,Warranty information,How long is the standard warranty on new compressors?,general
+2026-03-26,Invoice not received,We have not received the invoice for the September maintenance visit.,billing
+2026-03-27,Service interval,The service interval warning appears even though service was done last week.,technical
+2026-03-28,Demo request,Can someone show us a demo of the new tool range?,general
+2026-03-31,Wrong purchase order on invoice,The purchase order number on the invoice is wrong so our system rejects it.,billing
+2026-04-01,Motor overload,Motor overload alarm appears when the machine runs at full load.,technical
+2026-04-02,Certificates,Can you share your ISO certificates for our supplier audit?,general
+2026-04-05,Split payment,Can we split the payment for the new compressor into two instalments?,billing
+2026-04-06,Pressure setting,How do I change the unloading pressure setting on the controller?,technical
+2026-04-07,Supplier registration,How do we register as a supplier to your company?,general
+2026-04-10,Bank details for payment,Please confirm your bank details so we can pay the outstanding invoice.,billing
+2026-04-11,Safety valve blowing,The safety valve opens and blows off air during normal operation.,technical
+2026-04-12,Event invitation,"Thank you for the invitation, can two colleagues join the customer event?",general
+2026-04-15,Discount not applied,Our agreed 10% discount was not applied on the last bill.,billing
+2026-04-16,Spare part for repair,Which spare part number do we need to replace the broken inlet valve?,technical
+2026-04-17,Website login,How do I create an account on your customer portal?,general
+2026-04-20,Tax invoice format,We need the tax invoice in the new e-invoice format for GST.,billing
+2026-04-21,Power fluctuation shutdown,The machine shuts down every time there is a power fluctuation.,technical
+2026-04-22,Lead time question,What is the usual delivery lead time for new machines?,general
+2026-04-25,Billing contact change,Please send all invoices to our new accounts payable team.,billing
+2026-04-26,High energy consumption,Energy consumption doubled this month without any change in production.,technical
+2026-04-27,Recycling old machine,Do you take back old compressors for recycling?,general
+2026-04-30,Extra charge for travel,Why is there an extra travel charge on the field service invoice?,billing
+2026-05-01,Error code meaning,What does alarm code E212 mean on the AX controller?,technical
+2026-05-02,Language support,Is your support team available in Hindi and Marathi?,general
+2026-05-05,Prepayment refund,"We cancelled the order, please refund the prepayment.",billing
+2026-05-06,Air filter warning,The air filter warning stays on after replacing the filter.,technical
+2026-05-07,Feedback,We want to give positive feedback about your service engineer.,general
+2026-05-10,Statement of account,Can you send our statement of account for this year?,billing
+2026-05-11,Cannot connect to controller,Our engineer cannot connect the laptop to the controller service port.,technical
+2026-05-12,Rental options,Do you offer machines for short term rental?,general
+2026-05-15,Payment reminder error,We got a payment reminder for an invoice that was already settled.,billing
+2026-05-16,Vacuum level low,The vacuum pump does not reach the required vacuum level.,technical
+2026-05-17,Case study,Do you have case studies from the food industry?,general
+2026-05-20,Invoice amount dispute,We dispute the invoice amount for the rental compressor.,billing
+2026-05-21,Fan not running,The cooling fan does not run although the compressor is loaded.,technical
+2026-05-22,Holiday closure,Is your support line open on public holidays?,general
+2026-05-25,Wrong customer name on invoice,Our company name is spelled wrong on the invoice.,billing
+2026-05-26,Leak detection,How can we find air leaks in our compressed air network?,technical
+2026-05-27,Information request,We need general information about your company for a vendor form.,general
+2026-05-30,Recurring charge,There is a recurring monthly charge we do not recognise on our account.,billing
+2026-05-31,Drain valve stuck,The automatic drain valve seems stuck open and air is escaping.,technical
+2026-06-01,Meeting request,Can we schedule a meeting to discuss future projects?,general

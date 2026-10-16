@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Train classifier and print metrics
+        run: python scripts/train_classifier.py
+      - name: Unit and API tests
+        run: python -m pytest
+      - name: Chatbot evaluation on the golden set
+        run: python scripts/evaluate_chatbot.py
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t ai-assessment-api:${{ github.sha }} .

@@ -1,0 +1,10 @@
+[project]
+name = "ai-platform-engineer-assessment"
+version = "1.0.0"
+description = "Support-ticket classifier and engineering knowledge chatbot (RAG with guardrails)"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"

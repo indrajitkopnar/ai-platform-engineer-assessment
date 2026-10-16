@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    image: ai-assessment-api:latest
+    container_name: ai-assessment-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env      # optional: copy .env.example to .env to use a real LLM
+        required: false
+    restart: unless-stopped
