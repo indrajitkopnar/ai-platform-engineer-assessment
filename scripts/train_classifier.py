@@ -16,6 +16,7 @@ from app.config import settings  # noqa: E402
 
 
 def main() -> None:
+    """Call train_and_evaluate() and print its metrics in a readable form."""
     metrics = train_and_evaluate(settings.classifier_data_path, settings.classifier_model_path)
 
     print(f"\nTrain size: {metrics['train_size']}   Test size (newest tickets): {metrics['test_size']}")

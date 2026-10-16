@@ -28,6 +28,8 @@ REFUSAL = "I couldn't find this in the available engineering documentation."
 
 
 class LLMClient(Protocol):
+    """Interface every LLM provider implements. TicketClassifier._ask_llm() and ChatService.ask()
+    depend only on this, so providers can be swapped (or faked in tests) without code changes."""
     def complete(self, system: str, user: str, *, json_mode: bool = False) -> str:
         """Return the model's text reply. `json_mode` asks for a JSON object."""
         ...
@@ -37,12 +39,16 @@ class OpenAICompatibleLLM:
     """Calls any OpenAI-compatible chat completions endpoint, with timeout and retries."""
 
     def __init__(self, cfg: Settings, max_retries: int = 3) -> None:
+        """Create one reusable HTTP client with the base URL, API key and timeout from settings.
+        Called by: get_llm() when LLM_PROVIDER=openai_compatible."""
         self.cfg = cfg
         self.max_retries = max_retries
         self.http = httpx.Client(base_url=cfg.llm_base_url, timeout=cfg.llm_timeout_seconds,
                                  headers={"Authorization": f"Bearer {cfg.llm_api_key}"})
 
     def complete(self, system: str, user: str, *, json_mode: bool = False) -> str:
+        """Send one chat request and return the reply text; retries 429/5xx/timeouts with backoff.
+        Called by: TicketClassifier._ask_llm() (json_mode=True) and ChatService.ask()."""
         body: dict = {
             "model": self.cfg.llm_model,
             "temperature": 0,  # factual tasks: no creativity
@@ -82,11 +88,15 @@ class MockLLM:
     }
 
     def complete(self, system: str, user: str, *, json_mode: bool = False) -> str:
+        """Route to the fake classifier or the fake answerer, mirroring what a real model would do.
+        Called by: TicketClassifier._ask_llm() and ChatService.ask() in offline mode."""
         if json_mode:
             return self._classify(user)
         return self._answer(user)
 
     def _classify(self, text: str) -> str:
+        """Keyword-count classification returned as the same JSON a real LLM must return.
+        Called by: MockLLM.complete() when json_mode=True."""
         lower = text.lower()
         scores = {label: sum(word in lower for word in words) for label, words in self._KEYWORDS.items()}
         best = max(scores, key=scores.get)
@@ -97,6 +107,8 @@ class MockLLM:
                            "reason": f"mentions {best}-related terms"})
 
     def _answer(self, prompt: str) -> str:
+        """Extractive answer: pick the context sentence sharing the most words with the question and
+        cite its [n]; return the refusal sentence if nothing matches well. Called by: MockLLM.complete()."""
         question = prompt.rsplit("QUESTION:", 1)[-1].strip()
         q_terms = {w for w in re.findall(r"[a-z0-9-]+", question.lower()) if len(w) > 2} - _STOPWORDS
         best_score, best_sentence, best_id = 0, "", 0
@@ -118,7 +130,8 @@ _STOPWORDS = {"what", "how", "the", "does", "for", "and", "are", "which", "when"
 
 
 def get_llm(cfg: Settings = settings) -> LLMClient:
-    """Factory: choose the provider from configuration."""
+    """Factory: choose the provider from LLM_PROVIDER. Called by: main.lifespan(), scripts/ask.py,
+    scripts/evaluate_chatbot.py."""
     if cfg.llm_provider == "openai_compatible":
         return OpenAICompatibleLLM(cfg)
     return MockLLM()

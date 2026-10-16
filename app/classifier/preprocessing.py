@@ -21,11 +21,13 @@ _SIGNOFF = re.compile(r"^(regards|best regards|kind regards|thanks|thank you|che
 
 
 def strip_html(text: str) -> str:
+    """Remove HTML tags and decode entities (&amp; -> &). Called by: clean_message()."""
     return html.unescape(_HTML_TAG.sub(" ", text))
 
 
 def remove_quoted_and_signature(text: str) -> str:
-    """Keep only the newest message: stop at a reply header, a sign-off line or a '-- ' signature."""
+    """Keep only the newest message: stop at a reply header, a sign-off line or a '-- ' signature.
+    Called by: clean_message()."""
     kept: list[str] = []
     for line in text.splitlines():
         stripped = line.strip()
@@ -38,13 +40,16 @@ def remove_quoted_and_signature(text: str) -> str:
 
 
 def mask_pii(text: str) -> str:
+    """Replace emails, IBANs and long numbers (phone/card/account) with placeholders so personal data
+    is never logged or sent to an LLM. Called by: clean_message()."""
     text = _EMAIL.sub("<EMAIL>", text)
     text = _IBAN.sub("<IBAN>", text)
     return _LONG_NUMBER.sub("<NUMBER>", text)
 
 
 def clean_message(subject: str, body: str) -> str:
-    """Subject + body → one cleaned, PII-masked, lower-cased string."""
+    """Subject + body -> one cleaned, PII-masked, lower-cased string.
+    Called by: Ticket.text (training) and TicketClassifier.classify() (prediction) — same code both times."""
     text = f"{subject}\n{body}" if subject else body
     text = remove_quoted_and_signature(strip_html(text))
     text = mask_pii(text)

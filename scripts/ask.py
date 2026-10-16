@@ -18,6 +18,7 @@ from app.llm import get_llm  # noqa: E402
 
 
 def main() -> None:
+    """Parse the command line and run either ChatService.ask() or TicketClassifier.classify(); print JSON."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("mode", choices=["chat", "classify"])
     parser.add_argument("text")

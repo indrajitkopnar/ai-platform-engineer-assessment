@@ -27,11 +27,13 @@ RRF_K = 60
 
 
 def tokenize(text: str) -> list[str]:
+    """Lower-case word tokens (keeps codes like e104, ax-200, telemetry_clean). Used by BM25 and search()."""
     return re.findall(r"[a-z0-9][a-z0-9_-]*", text.lower())
 
 
 @dataclass
 class SearchHit:
+    """One search result returned by HybridRetriever.search() to ChatService.ask()."""
     chunk: Chunk
     relevance: float      # semantic similarity of this chunk to the question (0..1), used by guardrails
     fused_score: float
@@ -41,12 +43,15 @@ class BM25:
     """Okapi BM25 keyword scoring (k1 = term-frequency saturation, b = length normalisation)."""
 
     def __init__(self, documents: list[list[str]], k1: float = 1.5, b: float = 0.75) -> None:
+        """Precompute document lengths, document frequencies and term counts once.
+        Called by: HybridRetriever.__init__()."""
         self.docs, self.k1, self.b = documents, k1, b
         self.avg_len = sum(map(len, documents)) / max(len(documents), 1)
         self.doc_freq = Counter(term for doc in documents for term in set(doc))
         self.tf = [Counter(doc) for doc in documents]
 
     def score(self, query: list[str], index: int) -> float:
+        """BM25 keyword score of one chunk for the query terms. Called by: HybridRetriever.search()."""
         n, total = len(self.docs), 0.0
         length = len(self.docs[index])
         for term in query:
@@ -59,7 +64,9 @@ class BM25:
 
 
 class HybridRetriever:
+    """The search index: vectors for semantic search + BM25 for keywords, with access-group filtering."""
     def __init__(self, chunks: list[Chunk], embedder: Embedder) -> None:
+        """Embed all chunks and build the BM25 index once at startup. Called by: ChatService.__init__()."""
         self.chunks = chunks
         self.embedder = embedder
         texts = [c.text for c in chunks]
@@ -68,6 +75,8 @@ class HybridRetriever:
         self.bm25 = BM25([tokenize(t) for t in texts])
 
     def search(self, question: str, user_groups: set[str], top_k: int = 4) -> list[SearchHit]:
+        """Return the top_k chunks the user may see: ACL filter -> cosine ranking + BM25 ranking ->
+        Reciprocal Rank Fusion. Called by: ChatService.ask() and scripts/evaluate_chatbot.py."""
         allowed = [i for i, c in enumerate(self.chunks) if c.access & user_groups]   # ACL filter first
         if not allowed:
             return []

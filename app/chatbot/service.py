@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class Citation(BaseModel):
+    """One cited source in the chat response: file, section, revision and relevance score."""
     id: int
     source: str
     section: str
@@ -39,6 +40,7 @@ class Citation(BaseModel):
 
 
 class ChatAnswer(BaseModel):
+    """API response for /v1/chat: status (answered / refused / blocked), answer, citations and guardrail notes."""
     status: Literal["answered", "refused", "blocked"]
     answer: str
     citations: list[Citation] = []
@@ -46,7 +48,11 @@ class ChatAnswer(BaseModel):
 
 
 class ChatService:
+    """Scenario 2 entry point — the RAG flow with guardrails. Created once at API startup (main.lifespan),
+    by scripts/ask.py and by scripts/evaluate_chatbot.py."""
     def __init__(self, llm: LLMClient, cfg: Settings = settings, embedder: Embedder | None = None) -> None:
+        """Load and chunk the documents and build the hybrid search index.
+        Called by: main.lifespan(), scripts/ask.py, scripts/evaluate_chatbot.py."""
         self.llm = llm
         self.cfg = cfg
         chunks = load_corpus(cfg.docs_path)
@@ -54,6 +60,9 @@ class ChatService:
         logger.info("Indexed %d chunks from %s", len(chunks), cfg.docs_path)
 
     def ask(self, question: str, user_groups: set[str]) -> ChatAnswer:
+        """Answer one question for a user with the given access groups: input check -> search ->
+        retrieval gate -> LLM -> citation and number checks -> answer with citations.
+        Called by: main.chat() (POST /v1/chat), scripts/ask.py, scripts/evaluate_chatbot.py."""
         if reason := guardrails.check_input(question):
             return ChatAnswer(status="blocked", answer="This question cannot be processed.", notes=[reason])
 

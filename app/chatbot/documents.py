@@ -20,6 +20,7 @@ OVERLAP_WORDS = 40
 
 @dataclass(frozen=True)
 class Chunk:
+    """One searchable piece of a document (one section) plus the metadata used for citations and access control."""
     chunk_id: str
     source: str           # file name, shown to the user as the citation
     title: str
@@ -30,7 +31,7 @@ class Chunk:
 
 
 def parse_front_matter(raw: str) -> tuple[dict[str, str], str]:
-    """Split a `---`-delimited header of `key: value` lines from the body."""
+    """Split a `---`-delimited header of `key: value` lines from the body. Called by: chunk_document()."""
     match = re.match(r"^---\n(.*?)\n---\n(.*)$", raw, re.S)
     if not match:
         return {}, raw
@@ -43,6 +44,7 @@ def parse_front_matter(raw: str) -> tuple[dict[str, str], str]:
 
 
 def _windows(words: list[str]) -> list[list[str]]:
+    """Cut a long section into overlapping word windows; short sections stay whole. Called by: chunk_document()."""
     if len(words) <= MAX_WORDS:
         return [words]
     step = MAX_WORDS - OVERLAP_WORDS
@@ -50,6 +52,8 @@ def _windows(words: list[str]) -> list[list[str]]:
 
 
 def chunk_document(path: Path) -> list[Chunk]:
+    """Read one Markdown file and return its chunks, one per `##` section (windows if long).
+    Called by: load_corpus()."""
     meta, body = parse_front_matter(path.read_text(encoding="utf-8").replace("\r\n", "\n"))
     title = meta.get("title", path.stem)
     access = frozenset(g.strip() for g in meta.get("access", "").split(",") if g.strip())
@@ -72,4 +76,5 @@ def chunk_document(path: Path) -> list[Chunk]:
 
 
 def load_corpus(docs_path: Path) -> list[Chunk]:
+    """Chunk every .md file in the docs folder. Called by: ChatService.__init__() to build the index."""
     return [chunk for path in sorted(docs_path.glob("*.md")) for chunk in chunk_document(path)]

@@ -27,7 +27,7 @@ _INJECTION = re.compile(
 
 
 def check_input(question: str) -> str | None:
-    """Return a rejection reason, or None if the question may proceed."""
+    """Return a rejection reason, or None if the question may proceed. Called by: ChatService.ask()."""
     if not question.strip():
         return "empty question"
     if len(question) > MAX_QUESTION_CHARS:
@@ -38,14 +38,19 @@ def check_input(question: str) -> str | None:
 
 
 def retrieval_is_sufficient(hits: list[SearchHit], min_relevance: float) -> bool:
+    """Retrieval gate: True only if the best chunk's similarity reaches MIN_RELEVANCE; otherwise
+    ChatService.ask() refuses without calling the LLM."""
     return bool(hits) and max(h.relevance for h in hits) >= min_relevance
 
 
 def cited_ids(answer: str) -> set[int]:
+    """Extract the [n] citation numbers from an answer. Used by the checks below and ChatService.ask()."""
     return {int(n) for n in re.findall(r"\[(\d+)\]", answer)}
 
 
 def check_citations(answer: str, hits: list[SearchHit]) -> str | None:
+    """Return a problem description if the answer has no citations or cites a source number that
+    was not provided; None if fine. Called by: ChatService.ask()."""
     if answer.strip() == REFUSAL:
         return None
     ids = cited_ids(answer)
@@ -58,7 +63,8 @@ def check_citations(answer: str, hits: list[SearchHit]) -> str | None:
 
 
 def check_numbers_grounded(answer: str, hits: list[SearchHit]) -> str | None:
-    """Every number in the answer must appear in at least one cited chunk."""
+    """Every number in the answer must appear in at least one cited chunk; returns the missing ones.
+    Called by: ChatService.ask()."""
     ids = cited_ids(answer)
     cited_text = " ".join(hits[i - 1].chunk.text for i in ids if 1 <= i <= len(hits))
     numbers = re.findall(r"\d+(?:\.\d+)?", re.sub(r"\[\d+\]", "", answer))
@@ -67,6 +73,7 @@ def check_numbers_grounded(answer: str, hits: list[SearchHit]) -> str | None:
 
 
 def safety_notice(hits: list[SearchHit], answer: str) -> str | None:
+    """Return a safety reminder if the answer cites a safety document, else None. Called by: ChatService.ask()."""
     cited = cited_ids(answer)
     if any("safety" in hits[i - 1].chunk.source for i in cited if 1 <= i <= len(hits)):
         return "Safety-related: always follow the official lock-out / tag-out procedure document."

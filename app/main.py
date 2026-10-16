@@ -33,7 +33,8 @@ services: dict[str, object] = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load models and build the search index once at startup, not per request."""
+    """Startup hook run by FastAPI: create the LLM client, TicketClassifier and ChatService once
+    (not per request) and store them in `services` for the endpoint functions below."""
     llm = get_llm()
     services["classifier"] = TicketClassifier(llm)
     services["chat"] = ChatService(llm)
@@ -49,7 +50,8 @@ app = FastAPI(title="AI Platform Engineer Assessment",
 
 @app.middleware("http")
 async def request_tracing(request: Request, call_next):
-    """Give every request an id (or keep the caller's) and log its latency — basic observability."""
+    """Middleware around every endpoint: attach a request id (or keep the caller's), return it in the
+    x-request-id header and log method, path, status and latency — basic observability."""
     request_id = request.headers.get("x-request-id", uuid.uuid4().hex[:12])
     start = time.perf_counter()
     response = await call_next(request)
@@ -60,12 +62,14 @@ async def request_tracing(request: Request, call_next):
 
 
 class ClassifyRequest(BaseModel):
+    """Request body for POST /v1/classify; Pydantic rejects empty or oversized input with HTTP 422."""
     subject: str = Field("", max_length=300, examples=["Invoice charged twice"])
     body: str = Field(..., min_length=1, max_length=10_000,
                       examples=["Hi, we were charged twice for invoice 4471. Please refund the duplicate."])
 
 
 class ChatRequest(BaseModel):
+    """Request body for POST /v1/chat: the question plus the caller's access groups."""
     question: str = Field(..., min_length=1, max_length=1000, examples=["What does alarm E104 mean?"])
     # In production the groups come from the user's SSO token, never from the request body.
     user_groups: list[str] = Field(default=["engineering"], examples=[["engineering"]])
@@ -73,14 +77,17 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health() -> dict:
+    """Liveness check used by Docker/Kubernetes health probes and load balancers."""
     return {"status": "ok", "llm_provider": settings.llm_provider}
 
 
 @app.post("/v1/classify", response_model=ClassificationResult)
 def classify(request: ClassifyRequest) -> ClassificationResult:
+    """Scenario 1 endpoint: delegates to TicketClassifier.classify() built at startup."""
     return services["classifier"].classify(request.subject, request.body)
 
 
 @app.post("/v1/chat", response_model=ChatAnswer)
 def chat(request: ChatRequest) -> ChatAnswer:
+    """Scenario 2 endpoint: delegates to ChatService.ask() built at startup."""
     return services["chat"].ask(request.question, set(request.user_groups))

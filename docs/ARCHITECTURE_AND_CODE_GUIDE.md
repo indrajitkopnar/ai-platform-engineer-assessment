@@ -78,6 +78,10 @@ ai-platform-engineer-assessment/
 ```
 `models/` is created by training and is not committed — models are build artefacts, rebuilt from data + code.
 
+**Reading the code:** every module starts with a docstring explaining *why* it exists, and every function and
+class has a docstring saying what it does and **which function calls it** (`Called by: ...`), so you can follow a
+request from the API endpoint down to the model.
+
 ## 3. Request flows
 
 **`POST /v1/classify`**

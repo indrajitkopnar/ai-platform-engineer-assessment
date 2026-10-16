@@ -30,6 +30,8 @@ RULES
 
 
 def build_user_prompt(question: str, hits: list[SearchHit]) -> str:
+    """Build the user message: numbered context blocks [1..k] (source, section, revision) + the question.
+    The numbers are what the answer cites and what guardrails.check_citations() verifies. Called by: ChatService.ask()."""
     blocks = [
         f"[{n}] (source: {h.chunk.source}, section: {h.chunk.section}, revision: {h.chunk.revision})\n{h.chunk.text}"
         for n, h in enumerate(hits, start=1)

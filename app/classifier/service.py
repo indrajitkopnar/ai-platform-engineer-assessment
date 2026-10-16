@@ -47,6 +47,7 @@ class LLMLabel(BaseModel):
 
 
 class ClassificationResult(BaseModel):
+    """API response for /v1/classify: category, confidence and which step decided (fast_model / llm / human_review)."""
     category: Literal["billing", "technical", "general", "needs_review"]
     confidence: float
     source: Literal["fast_model", "llm", "human_review"]
@@ -54,7 +55,11 @@ class ClassificationResult(BaseModel):
 
 
 class TicketClassifier:
+    """Scenario 1 entry point — the fast model -> LLM -> human-review cascade.
+    Created once at API startup (main.lifespan) and by scripts/ask.py."""
     def __init__(self, llm: LLMClient, cfg: Settings = settings, model: Pipeline | None = None) -> None:
+        """Load the trained model, training it first if the file is missing (fresh clone / first start).
+        Called by: main.lifespan() and scripts/ask.py."""
         self.llm = llm
         self.threshold = cfg.classifier_confidence_threshold
         if model is None:
@@ -65,6 +70,8 @@ class TicketClassifier:
         self.model = model
 
     def classify(self, subject: str, body: str) -> ClassificationResult:
+        """Classify one message: fast model if confident, else LLM fallback, else needs_review.
+        Called by: main.classify() (POST /v1/classify) and scripts/ask.py."""
         text = clean_message(subject, body)
         probabilities = self.model.predict_proba([text])[0]
         best = int(probabilities.argmax())
@@ -82,6 +89,8 @@ class TicketClassifier:
                                     reason=f"low confidence (fast model guessed '{label}')")
 
     def _ask_llm(self, cleaned_text: str) -> LLMLabel | None:
+        """Ask the LLM for a label and validate it against LLMLabel; return None on invalid output or
+        any provider error so classify() falls back to human review. Called by: classify()."""
         try:
             raw = self.llm.complete(SYSTEM_PROMPT, cleaned_text, json_mode=True)
             return LLMLabel.model_validate_json(raw)

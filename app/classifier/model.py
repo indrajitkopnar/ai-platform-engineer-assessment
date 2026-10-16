@@ -27,6 +27,7 @@ LABELS = ["billing", "technical", "general"]
 
 @dataclass
 class Ticket:
+    """One labelled support ticket, as read from data/support_tickets.csv by load_tickets()."""
     received_at: str
     subject: str
     body: str
@@ -34,16 +35,18 @@ class Ticket:
 
     @property
     def text(self) -> str:
+        """The cleaned text the model is trained on — same clean_message() used at prediction time."""
         return clean_message(self.subject, self.body)
 
 
 def load_tickets(path: Path) -> list[Ticket]:
+    """Read the labelled CSV into Ticket objects. Called by: train_and_evaluate()."""
     with path.open(encoding="utf-8", newline="") as f:
         return [Ticket(**row) for row in csv.DictReader(f)]
 
 
 def time_split(tickets: list[Ticket], test_fraction: float = 0.25) -> tuple[list[Ticket], list[Ticket]]:
-    """Train on older tickets, test on newer ones — mirrors production and exposes drift.
+    """Train on older tickets, test on newer ones — mirrors production and exposes drift. Called by: train_and_evaluate().
     (A random split would leak near-duplicate tickets from the same week into both sides.)"""
     ordered = sorted(tickets, key=lambda t: t.received_at)
     cut = int(len(ordered) * (1 - test_fraction))
@@ -51,6 +54,8 @@ def time_split(tickets: list[Ticket], test_fraction: float = 0.25) -> tuple[list
 
 
 def build_pipeline() -> Pipeline:
+    """Build the TF-IDF + logistic regression pipeline. Called by: train_and_evaluate() (twice:
+    once for the evaluation model, once for the final model trained on all data)."""
     return Pipeline([
         # word 1–2 grams catch phrases like "charged twice"; sublinear tf damps repeated words
         ("tfidf", TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True, min_df=1)),
@@ -61,7 +66,8 @@ def build_pipeline() -> Pipeline:
 
 def coverage_at_thresholds(model: Pipeline, texts: list[str], labels: list[str]) -> list[dict]:
     """For each confidence threshold: what share is auto-classified, and how accurate is that share.
-    This table is how the business picks the operating point (automation vs. accuracy)."""
+    This table is how the business picks the operating point (automation vs. accuracy).
+    Called by: train_and_evaluate()."""
     probs = model.predict_proba(texts)
     classes = list(model.classes_)
     rows = []
@@ -74,7 +80,8 @@ def coverage_at_thresholds(model: Pipeline, texts: list[str], labels: list[str])
 
 
 def train_and_evaluate(data_path: Path, model_path: Path) -> dict:
-    """Train on the older split, report metrics on the newer split, then refit on all data and save."""
+    """Train on the older split, report metrics on the newer split, then refit on all data and save.
+    Called by: scripts/train_classifier.py and TicketClassifier.__init__() when no model file exists."""
     tickets = load_tickets(data_path)
     train, test = time_split(tickets)
 
@@ -99,4 +106,5 @@ def train_and_evaluate(data_path: Path, model_path: Path) -> dict:
 
 
 def load_model(model_path: Path) -> Pipeline:
+    """Load the saved pipeline from disk. Called by: TicketClassifier.__init__()."""
     return joblib.load(model_path)

@@ -25,6 +25,8 @@ from app.llm import get_llm  # noqa: E402
 
 
 def main() -> None:
+    """Run every golden-set question through ChatService.ask(), compare with the expected source,
+    status and key fact, and print the five metrics."""
     cases = [json.loads(line) for line in (ROOT / "data/eval/chatbot_golden_set.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
     service = ChatService(get_llm())
 
@@ -49,6 +51,7 @@ def main() -> None:
         print(f"[{mark}] {result.status:<8} {case['question'][:60]:<60} | {result.answer[:70]}")
 
     def pct(a: int, b: int) -> str:
+        """Format a ratio as 'a/b = NN%'. Called by: main() when printing metrics."""
         return f"{a}/{b} = {a / b:.0%}" if b else "n/a"
 
     print("\nretrieval_hit_rate :", pct(retrieval_hits, answerable))

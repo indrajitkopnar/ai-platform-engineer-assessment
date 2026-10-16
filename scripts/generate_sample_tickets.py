@@ -115,6 +115,7 @@ GENERAL = [
 
 
 def main() -> None:
+    """Write 90 tickets (30 per class) to data/support_tickets.csv with interleaved dates."""
     start = datetime.date(2026, 1, 5)
     rows = []
     # Interleave classes over time so both the older (train) and newer (test) split contain every class.

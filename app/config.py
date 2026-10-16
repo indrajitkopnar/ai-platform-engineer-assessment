@@ -30,6 +30,8 @@ _load_dotenv(PROJECT_ROOT / ".env")
 
 @dataclass(frozen=True)
 class Settings:
+    """All runtime settings in one immutable object. Read via the module-level `settings`
+    by llm.py, classifier/service.py, chatbot/service.py and main.py."""
     # LLM gateway: "mock" runs fully offline; "openai_compatible" works with OpenAI,
     # Azure OpenAI (v1 endpoint), Ollama, vLLM or a LiteLLM proxy in front of any provider.
     llm_provider: str = os.getenv("LLM_PROVIDER", "mock")
